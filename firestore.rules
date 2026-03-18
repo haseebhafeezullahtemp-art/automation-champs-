@@ -1,0 +1,120 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users
+// Document ID: {uid}
+// Fields:
+//   - uid: string (required)
+//   - email: string (required, email)
+//   - displayName: string
+//   - createdAt: timestamp
+//
+// Collection: fbAccounts
+// Document ID: {id}
+// Fields:
+//   - uid: string (required) - owner
+//   - fbId: string (required)
+//   - name: string
+//   - email: string
+//   - accessToken: string (required)
+//   - expiresAt: number
+//   - createdAt: timestamp
+//
+// Collection: pages
+// Document ID: {id}
+// Fields:
+//   - uid: string (required) - owner
+//   - fbAccountId: string (required)
+//   - pageId: string (required)
+//   - name: string
+//   - accessToken: string (required)
+//   - category: string
+//   - lastUsed: timestamp
+//
+// Collection: pairs
+// Document ID: {id}
+// Fields:
+//   - uid: string (required) - owner
+//   - sourceUrl: string (required)
+//   - sourceType: string (enum: tiktok, instagram)
+//   - pageId: string (required)
+//   - pageName: string
+//   - scheduleTimes: list (strings)
+//   - status: string (enum: active, paused, error)
+//   - lastPostAt: timestamp
+//   - postedVideoIds: list (strings)
+//   - createdAt: timestamp
+//
+// Collection: logs
+// Document ID: {id}
+// Fields:
+//   - uid: string (required) - owner
+//   - pairId: string
+//   - action: string (required)
+//   - status: string (required)
+//   - message: string
+//   - timestamp: timestamp (required)
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidStatus(status) {
+      return status in ['active', 'paused', 'error'];
+    }
+
+    function isValidSourceType(type) {
+      return type in ['tiktok', 'instagram'];
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+    }
+
+    match /fbAccounts/{id} {
+      allow read, write: if isAuthenticated() && (request.resource.data.uid == request.auth.uid || resource.data.uid == request.auth.uid);
+    }
+
+    match /pages/{id} {
+      allow read, write: if isAuthenticated() && (request.resource.data.uid == request.auth.uid || resource.data.uid == request.auth.uid);
+    }
+
+    match /pairs/{id} {
+      allow read, write: if isAuthenticated() && (request.resource.data.uid == request.auth.uid || resource.data.uid == request.auth.uid);
+    }
+
+    match /logs/{id} {
+      allow read, write: if isAuthenticated() && (request.resource.data.uid == request.auth.uid || resource.data.uid == request.auth.uid);
+    }
+  }
+}

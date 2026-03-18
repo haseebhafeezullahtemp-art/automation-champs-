@@ -1,0 +1,85 @@
+{
+  "entities": {
+    "users": {
+      "title": "User",
+      "description": "App user profile",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "fbAccounts": {
+      "title": "Facebook Account",
+      "description": "Connected Facebook account",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "fbId": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "accessToken": { "type": "string" },
+        "expiresAt": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "fbId", "accessToken"]
+    },
+    "pages": {
+      "title": "Facebook Page",
+      "description": "Managed Facebook Page",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "fbAccountId": { "type": "string" },
+        "pageId": { "type": "string" },
+        "name": { "type": "string" },
+        "accessToken": { "type": "string" },
+        "category": { "type": "string" },
+        "lastUsed": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "fbAccountId", "pageId", "accessToken"]
+    },
+    "pairs": {
+      "title": "Automation Pair",
+      "description": "Pairing of a source (TikTok/IG) with a destination (FB Page)",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "sourceUrl": { "type": "string" },
+        "sourceType": { "type": "string", "enum": ["tiktok", "instagram"] },
+        "pageId": { "type": "string" },
+        "pageName": { "type": "string" },
+        "scheduleTimes": { "type": "array", "items": { "type": "string" } },
+        "status": { "type": "string", "enum": ["active", "paused", "error"] },
+        "lastPostAt": { "type": "string", "format": "date-time" },
+        "postedVideoIds": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "sourceUrl", "pageId", "status"]
+    },
+    "logs": {
+      "title": "Automation Log",
+      "description": "Logs of automation activities",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "pairId": { "type": "string" },
+        "action": { "type": "string" },
+        "status": { "type": "string" },
+        "message": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "action", "status", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": { "schema": "users", "description": "User profile" },
+    "/fbAccounts/{id}": { "schema": "fbAccounts", "description": "Connected FB accounts" },
+    "/pages/{id}": { "schema": "pages", "description": "Managed FB Pages" },
+    "/pairs/{id}": { "schema": "pairs", "description": "Automation pairs" },
+    "/logs/{id}": { "schema": "logs", "description": "Automation logs" }
+  }
+}
